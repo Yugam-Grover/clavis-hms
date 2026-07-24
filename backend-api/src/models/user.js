@@ -1,5 +1,8 @@
 const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
+
+const { AppError } = require("../utils/errorHandlers");
+
 const userSchema = new mongoose.Schema(
   {
     fullName: {
@@ -43,9 +46,10 @@ userSchema.pre("save", async function () {
 
 userSchema.statics.findByCredentials = async function (email, password) {
   const user = await User.findOne({ email }).select("+password");
-  if (!user) throw new Error("Unable to login!");
+  if (!user) throw new AppError("Unable to login", 401);
   const isMatch = await bcrypt.compare(password, user.password);
-  if (!isMatch) throw new Error("Unable to login!");
+  if (!isMatch) throw new AppError("Unable to login", 401);
+
   return user;
 };
 const User = mongoose.model("User", userSchema);
