@@ -38,6 +38,17 @@ const userSchema = new mongoose.Schema(
   },
 );
 
+userSchema.methods.toJSON = function () {
+  const userObject = this.toObject();
+
+  if (userObject.avatar)
+    userObject.avatar = `${process.env.SERVER_URL}/api/auth/${userObject._id}/avatar`;
+
+  delete password;
+
+  return userObject;
+};
+
 userSchema.pre("save", async function () {
   if (this.isModified("password")) {
     this.password = await bcrypt.hash(this.password, 8);

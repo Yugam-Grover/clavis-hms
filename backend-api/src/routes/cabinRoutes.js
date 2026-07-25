@@ -1,23 +1,64 @@
 const express = require("express");
-const router = express.Router();
+const sharp = require("sharp");
 const Cabin = require("../models/cabin");
 const { catchAsync, AppError } = require("../utils/errorHandlers");
 const auth = require("../middleware/authMiddleware");
+const upload = require("../middleware/uploadMiddleware");
+
+const router = express.Router();
 
 router.use(auth);
 
 router.get(
   "/",
   catchAsync(async (req, res) => {
-    const cabins = await Cabin.find();
+    const { filter, sortBy } = req.query;
+
+    const filterObj = {};
+    const sort = {};
+
+    if (filter && filter !== "all") {
+      if (filter === "no-discount") {
+        filterObj.discount = 0;
+      }
+      if (filter === "with-discount") {
+        filterObj.discount = { $gt: 0 };
+      }
+    }
+
+    if (sortBy) {
+      const [field, direction] = sortBy.split("-");
+
+      const allowedFields = ["name", "regularPrice", "maxCapacity"];
+
+      if (
+        allowedFields.includes(field) &&
+        (direction === "asc" || direction === "desc")
+      ) {
+        sort[field] = direction === "asc" ? 1 : -1;
+      }
+    }
+
+    const cabins = await Cabin.find(filterObj).sort(sort);
     res.send(cabins);
   }),
 );
 
 router.post(
   "/",
+  upload.single("image"),
   catchAsync(async (req, res) => {
-    const cabin = new Cabin(req.body);
+    let cabin;
+    if (req.file) {
+      const buffer = await sharp(req.file.buffer)
+        .resize({ width: 256, height: 256 })
+        .png()
+        .toBuffer();
+      cabin = new Cabin({ ...req.body, image: buffer });
+    } else {
+      cabin = new Cabin(req.body);
+    }
+
     await cabin.save();
     res.status(201).send(cabin);
   }),
@@ -25,7 +66,16 @@ router.post(
 
 router.patch(
   "/:id",
+  upload.single("image"),
   catchAsync(async (req, res, next) => {
+    if (req.file) {
+      const buffer = await sharp(req.file.buffer)
+        .resize({ width: 256, height: 256 })
+        .png()
+        .toBuffer();
+      req.body.image = buffer;
+    }
+
     const updates = Object.keys(req.body);
     const allowedUpdates = [
       "name",
@@ -59,3 +109,16 @@ router.delete(
   }),
 );
 module.exports = router;
+
+router.get(
+  "/:id/image",
+  catchAsync(async (req, res, next) => {
+    const cabin = await Cabin.findById(req.params.id);
+
+    if (!cabin || !cabin.image)
+      return next(new AppError("No image found for this cabin", 404));
+
+    res.set("Content-Type", "image/png");
+    res.send(cabin.image);
+  }),
+);

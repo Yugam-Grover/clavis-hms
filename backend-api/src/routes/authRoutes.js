@@ -3,6 +3,8 @@ const jwt = require("jsonwebtoken");
 const User = require("../models/user");
 const auth = require("../middleware/authMiddleware");
 const { catchAsync, AppError } = require("../utils/errorHandlers");
+const upload = require("../middleware/uploadMiddleware");
+const sharp = require("sharp");
 
 const router = express.Router();
 
@@ -62,7 +64,15 @@ router.get(
 router.patch(
   "/update-me",
   auth,
+  upload.single("avatar"),
   catchAsync(async (req, res, next) => {
+    if (req.file) {
+      const buffer = await sharp(req.file.buffer)
+        .resize({ width: 256, height: 256 })
+        .png()
+        .toBuffer();
+      req.user.avatar = buffer;
+    }
     const updates = Object.keys(req.body);
     const allowedUpdates = ["fullName", "password", "avatar"];
     const isValidUpdate = updates.every((update) =>
@@ -85,6 +95,20 @@ router.post(
       httpOnly: true,
     });
     res.status(200).send({ status: "success" });
+  }),
+);
+
+router.get(
+  "/:id/avatar",
+  auth,
+  catchAsync(async (req, res, next) => {
+    const user = await User.findById(req.params.id);
+
+    if (!user || !user.avatar)
+      return next(new AppError("No avatar found", 404));
+
+    res.set("Content-Type", "image/png");
+    res.send(user.avatar);
   }),
 );
 module.exports = router;

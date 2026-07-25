@@ -36,6 +36,16 @@ const cabinSchema = new mongoose.Schema(
     timestamps: true,
   },
 );
+
+cabinSchema.methods.toJSON = function () {
+  const cabinObject = this.toObject();
+
+  if (cabinObject.image)
+    cabinObject.image = `${process.env.SERVER_URL}/api/cabins/${cabinObject._id}/avatar`;
+
+  return cabinObject;
+};
+
 cabinSchema.path("discount").validate(function (value) {
   return value < this.regularPrice;
 }, "Discount must be less than the regular price");

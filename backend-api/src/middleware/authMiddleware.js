@@ -1,6 +1,6 @@
 const jwt = require("jsonwebtoken");
 const User = require("../models/user");
-const { AppError } = require("../utils/errorHandlers");
+const { catchAsync, AppError } = require("../utils/errorHandlers");
 
 const auth = catchAsync(async (req, res, next) => {
   let token;
