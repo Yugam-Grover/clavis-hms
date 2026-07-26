@@ -41,7 +41,14 @@ cabinSchema.methods.toJSON = function () {
   const cabinObject = this.toObject();
 
   if (cabinObject.image)
-    cabinObject.image = `${process.env.SERVER_URL}/api/cabins/${cabinObject._id}/avatar`;
+    cabinObject.image = `${process.env.SERVER_URL}/api/cabins/${cabinObject._id}/image`;
+
+  cabinObject.id = cabinObject._id;
+  delete cabinObject._id;
+  delete cabinObject.__v;
+
+  cabinObject.created_at = cabinObject.createdAt;
+  delete cabinObject.createdAt;
 
   return cabinObject;
 };

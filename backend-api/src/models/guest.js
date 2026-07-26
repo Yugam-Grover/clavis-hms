@@ -30,6 +30,19 @@ const guestSchema = new mongoose.Schema(
   },
 );
 
+guestSchema.methods.toJSON = function () {
+  const guestObject = this.toObject();
+
+  guestObject.id = guestObject._id;
+  delete guestObject._id;
+  delete guestObject.__v;
+
+  guestObject.created_at = guestObject.createdAt;
+  delete guestObject.createdAt;
+
+  return guestObject;
+};
+
 const Guest = mongoose.model("Guest", guestSchema);
 
 module.exports = Guest;

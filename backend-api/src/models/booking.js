@@ -1,5 +1,4 @@
 const mongoose = require("mongoose");
-const AutoIncrement = require("mongoose-sequence")(mongoose);
 
 const bookingSchema = new mongoose.Schema(
   {
@@ -70,7 +69,37 @@ const bookingSchema = new mongoose.Schema(
   },
 );
 
-bookingSchema.plugin(AutoIncrement, { inc_field: "bookingNumber" });
+bookingSchema.methods.toJSON = function () {
+  const bookingObject = this.toObject();
+
+  bookingObject.id = bookingObject._id;
+
+  delete bookingObject._id;
+  delete bookingObject.__v;
+
+  bookingObject.created_at = bookingObject.createdAt;
+  delete bookingObject.createdAt;
+
+  return bookingObject;
+};
+
+const counterSchema = new mongoose.Schema({
+  id: { type: String, required: true, unique: true },
+  seq: { type: Number, default: 0 },
+});
+const Counter =
+  mongoose.models.Counter || mongoose.model("Counter", counterSchema);
+
+bookingSchema.pre("save", async function () {
+  if (this.isNew) {
+    const counter = await Counter.findOneAndUpdate(
+      { id: "bookingNumber" },
+      { $inc: { seq: 1 } },
+      { returnDocument: "after", upsert: true },
+    );
+    this.bookingNumber = counter.seq;
+  }
+});
 
 const Booking = mongoose.model("Booking", bookingSchema);
 

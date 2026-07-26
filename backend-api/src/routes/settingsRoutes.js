@@ -3,7 +3,7 @@ const auth = require("../middleware/authMiddleware");
 const settingsController = require("../controllers/settingsController");
 const router = express.Router();
 
-router.use(auth);
+// router.use(auth);
 
 router
   .route("/")

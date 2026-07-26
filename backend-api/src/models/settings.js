@@ -24,6 +24,19 @@ const settingSchema = new mongoose.Schema(
   },
 );
 
+settingSchema.methods.toJSON = function () {
+  const settingsObject = this.toObject();
+
+  settingsObject.id = settingsObject._id;
+  delete settingsObject._id;
+  delete settingsObject.__v;
+
+  settingsObject.created_at = settingsObject.createdAt;
+  delete settingsObject.createdAt;
+
+  return settingsObject;
+};
+
 const Setting = mongoose.model("Setting", settingSchema);
 
 module.exports = Setting;

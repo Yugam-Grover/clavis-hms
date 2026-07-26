@@ -29,7 +29,11 @@ exports.signup = catchAsync(async (req, res, next) => {
   const user = new User({ fullName, email, password, role: "staff" });
   await user.save();
 
-  sendTokenResponse(user, 201, res);
+  user.password = undefined;
+  res.status(201).json({
+    status: "success",
+    data: user,
+  });
 });
 
 exports.login = catchAsync(async (req, res, next) => {
@@ -53,8 +57,9 @@ exports.updateMe = catchAsync(async (req, res, next) => {
       .toBuffer();
     req.user.avatar = buffer;
   }
+  delete req.body.avatar;
   const updates = Object.keys(req.body);
-  const allowedUpdates = ["fullName", "password", "avatar"];
+  const allowedUpdates = ["fullName", "password"];
   const isValidUpdate = updates.every((update) =>
     allowedUpdates.includes(update),
   );

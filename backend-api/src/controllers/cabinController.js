@@ -20,13 +20,20 @@ exports.getAllCabins = catchAsync(async (req, res) => {
   if (sortBy) {
     const [field, direction] = sortBy.split("-");
 
-    const allowedFields = ["name", "regularPrice", "maxCapacity"];
+    const allowedFields = [
+      "name",
+      "regularPrice",
+      "maxCapacity",
+      "created_at",
+      "createdAt",
+    ];
 
     if (
       allowedFields.includes(field) &&
       (direction === "asc" || direction === "desc")
     ) {
-      sort[field] = direction === "asc" ? 1 : -1;
+      const sortField = field === "created_at" ? "createdAt" : field;
+      sort[sortField] = direction === "asc" ? 1 : -1;
     }
   }
 

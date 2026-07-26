@@ -44,7 +44,12 @@ userSchema.methods.toJSON = function () {
   if (userObject.avatar)
     userObject.avatar = `${process.env.SERVER_URL}/api/auth/${userObject._id}/avatar`;
 
-  delete password;
+  userObject.id = userObject._id;
+  delete userObject._id;
+  delete userObject.__v;
+  delete userObject.password;
+  userObject.created_at = userObject.createdAt;
+  delete userObject.createdAt;
 
   return userObject;
 };

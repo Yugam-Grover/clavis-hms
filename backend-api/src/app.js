@@ -12,11 +12,15 @@ const bookingRoutes = require("./routes/bookingRoutes");
 
 const app = express();
 
-app.use(helmet());
+app.use(
+  helmet({
+    crossOriginResourcePolicy: { policy: "cross-origin" },
+  }),
+);
 
 app.use(
   cors({
-    origin: ["http://localhost:5173"],
+    origin: [process.env.CLIENT_URL],
     credentials: true,
   }),
 );
@@ -30,7 +34,7 @@ app.use("/api/cabins", cabinRoutes);
 app.use("/api/guests", guestRoutes);
 app.use("/api/settings", settingsRoutes);
 
-app.all("*", (req, res, next) => {
+app.use((req, res, next) => {
   next(new AppError(`Route ${req.originalUrl} not found`, 404));
 });
 

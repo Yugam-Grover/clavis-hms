@@ -7,9 +7,12 @@ const router = express.Router();
 router.use(auth);
 
 router.get("/", bookingController.getAllBookings);
+router.get("/bookings-after-date", bookingController.bookingsAfterDate);
+router.get("/stays-after-date", bookingController.staysAfterDate);
+router.get("/stays-today-activity", bookingController.staysTodayActivity);
 
 router
-  .route(":/id")
+  .route("/:id")
   .get(bookingController.getBooking)
   .patch(bookingController.updateBooking)
   .delete(bookingController.deleteBooking);
