@@ -1,27 +1,14 @@
-import supabase from "./supabase";
+import fetchAPI from "./apiClient";
 
 export async function getSettings() {
-  const { data: session } = await supabase.auth.getSession();
-  if (!session.session) return null;
-  const { data, error } = await supabase.from("settings").select().single();
-  if (error) throw new Error("Failed to fetch from server");
-
-  return data;
+  const response = await fetchAPI("api/settings");
+  return response;
 }
 
 export async function updateSetting(setting) {
-  const { data: settingsData, error: fetchError } = await supabase
-    .from("settings")
-    .select("id")
-    .single();
-  if (fetchError) throw new Error("Failed to resolve settings row ID");
-  const { data, error } = await supabase
-    .from("settings")
-    .update(setting)
-    .eq("id", settingsData.id)
-    .select();
-
-  if (error) throw new Error("Failed to update the setting");
-
-  return data;
+  const response = await fetchAPI("api/settings", {
+    method: "PATCH",
+    body: JSON.stringify(setting),
+  });
+  return response;
 }

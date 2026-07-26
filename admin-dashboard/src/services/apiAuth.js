@@ -1,68 +1,47 @@
-import supabase, { supabaseUrl } from "./supabase";
-export async function LoginAuth({ email, password }) {
-  let { data, error } = await supabase.auth.signInWithPassword({
-    email,
-    password,
-  });
+import fetchAPI from "./apiClient";
 
-  if (error) throw new Error("Error", error.message);
-  return data;
+export async function LoginAuth(credentials) {
+  const response = await fetchAPI("api/auth/login", {
+    method: "POST",
+    body: JSON.stringify(credentials),
+  });
+  return response.data.user;
 }
 export default LoginAuth;
-export async function getCurrentUser() {
-  const { data: session } = await supabase.auth.getSession();
-  if (!session.session) return null;
-  const { data, error } = await supabase.auth.getUser();
 
-  if (error) throw new Error("Error", error.message);
-  return data?.user;
+export async function getCurrentUser() {
+  const response = await fetchAPI("api/auth/me");
+  return response;
 }
 
 export async function Logout() {
-  const { error } = await supabase.auth.signOut();
-  if (error) throw new Error("Error", error.message);
+  await fetchAPI("api/auth/logout", {
+    method: "POST",
+  });
 }
 
-export async function SignUp({ fullName, email, password }) {
-  const { data, error } = await supabase.auth.signUp({
-    email,
-    password,
-    options: {
-      data: {
-        fullName,
-        avatar: "",
-      },
-    },
+export async function SignUp(credentials) {
+  const response = await fetchAPI("api/auth/signup", {
+    method: "POST",
+    body: JSON.stringify(credentials),
   });
-
-  if (error) throw new Error(error.message);
-
-  return data;
+  return response;
 }
 
-export async function UpdateCurrentUser({ fullName, password, avatar }) {
-  let updateData;
-  if (password) updateData = { password };
-  if (fullName) updateData = { data: { fullName } };
-  const { data, error } = await supabase.auth.updateUser(updateData);
+export async function UpdateCurrentUser(userData) {
+  let data;
+  if (userData.avatar && typeof userData.avatar === "object") {
+    data = new FormData();
+    if (userData.fullName) data.append("fullName", userData.fullName);
+    if (userData.password) data.append("password", userData.password);
+    data.append("avatar", userData.avatar);
+  } else {
+    data = JSON.stringify(userData);
+  }
 
-  if (error) throw new Error(error.message);
-
-  if (!avatar) return data;
-  const filename = `avatar-${data.user.id}-${Math.random()}`;
-  const { error: storageError } = await supabase.storage
-    .from("avatars")
-    .upload(filename, avatar);
-
-  if (storageError) throw new Error(storageError.message);
-
-  const { data: updatedUser, error: error2 } = await supabase.auth.updateUser({
-    data: {
-      avatar: `${supabaseUrl}/storage/v1/object/public/avatars/${filename}`,
-    },
+  const response = await fetchAPI("api/auth/update-me", {
+    method: "PATCH",
+    body: data,
   });
-
-  if (error2) throw new Error(error.message);
-
-  return updatedUser;
+  return response;
 }

@@ -25,13 +25,13 @@ const Guest = styled.div`
 `;
 
 function TodayItem({ activity }) {
-  const { id, status, guests, numNights } = activity;
+  const { id, status, guest, numNights } = activity;
   return (
     <StyledTodayItem>
       {status === "unconfirmed" && <Tag type="green">Arriving</Tag>}
       {status === "checked-in" && <Tag type="blue">Departing</Tag>}
-      <Flag src={guests.countryFlag} alt={`Flag of ${guests.nationality}`} />
-      <Guest>{guests.name}</Guest>
+      <Flag src={guest.countryFlag} alt={`Flag of ${guest.nationality}`} />
+      <Guest>{guest.name}</Guest>
       <div>{numNights} nights</div>
       {status === "unconfirmed" && (
         <Button size="small" as={Link} to={`/checkin/${id}`}>

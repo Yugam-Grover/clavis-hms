@@ -12,10 +12,7 @@ import useUpdateUser from "./useUpdateUser";
 function UpdateUserDataForm() {
   const { updateUser, isUpdating } = useUpdateUser();
   const {
-    user: {
-      email,
-      user_metadata: { fullName: currentFullName },
-    },
+    user: { email, fullName: currentFullName },
   } = useUser();
 
   const [fullName, setFullName] = useState(currentFullName);

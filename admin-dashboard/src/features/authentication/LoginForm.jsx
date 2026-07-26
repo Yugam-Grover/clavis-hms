@@ -8,8 +8,8 @@ import useLogin from "./useLogin";
 
 function LoginForm() {
   const { login, isLoading } = useLogin();
-  const [email, setEmail] = useState("yugam@test.com");
-  const [password, setPassword] = useState("12345678");
+  const [email, setEmail] = useState("admin@clavis.com");
+  const [password, setPassword] = useState("admin1234");
   function handleSubmit(e) {
     e.preventDefault();
     if (!email || !password) return;

@@ -39,7 +39,7 @@ function CheckinBooking() {
   const {
     id: bookingId,
     bookingNumber,
-    guests,
+    guest,
     totalPrice,
     numGuests,
     hasBreakfast,
@@ -90,7 +90,7 @@ function CheckinBooking() {
           checked={confirmPaid}
           onChange={() => setConfirmPaid((confirm) => !confirm)}
           disabled={confirmPaid}>
-          I confirm that {guests.name} has paid the total amount{" "}
+          I confirm that {guest.name} has paid the total amount{" "}
           {!addBreakfast
             ? formatCurrency(totalPrice)
             : `${formatCurrency(totalPrice + optionalBreakfastPrice)} (${formatCurrency(totalPrice)} + ${formatCurrency(optionalBreakfastPrice)})`}
