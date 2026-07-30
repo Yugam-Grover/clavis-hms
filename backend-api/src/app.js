@@ -9,7 +9,7 @@ const authRoutes = require("./routes/authRoutes");
 const guestRoutes = require("./routes/guestRoutes");
 const settingsRoutes = require("./routes/settingsRoutes");
 const bookingRoutes = require("./routes/bookingRoutes");
-
+const AppError = require("./utils/errorHandlers");
 const app = express();
 
 app.use(
@@ -20,7 +20,10 @@ app.use(
 
 app.use(
   cors({
-    origin: [process.env.CLIENT_URL],
+    origin:
+      process.env.NODE_ENV === "production"
+        ? process.env.CLIENT_URL
+        : "http://localhost:5173",
     credentials: true,
   }),
 );
