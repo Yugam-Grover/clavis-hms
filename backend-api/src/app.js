@@ -9,7 +9,7 @@ const authRoutes = require("./routes/authRoutes");
 const guestRoutes = require("./routes/guestRoutes");
 const settingsRoutes = require("./routes/settingsRoutes");
 const bookingRoutes = require("./routes/bookingRoutes");
-const AppError = require("./utils/errorHandlers");
+const { AppError } = require("./utils/errorHandlers");
 const app = express();
 
 app.use(
